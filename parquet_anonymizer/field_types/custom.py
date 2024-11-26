@@ -1,7 +1,6 @@
 from . import BaseFieldType
 from .decorators.apply_user_callback import apply_user_callback
 from .decorators.text_formatter import apply_formatting_options
-from parquet_anonymizer.user.user_callback import UserCallback
 
 
 class Custom(BaseFieldType):

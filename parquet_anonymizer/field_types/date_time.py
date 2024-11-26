@@ -1,8 +1,9 @@
-import dateutil.parser as date_parser
 from datetime import datetime
+
+import dateutil.parser as date_parser
+
 from . import BaseFieldType
 from .decorators import apply_formatting_options
-from parquet_anonymizer.user.user_callback import UserCallback
 from .decorators.apply_user_callback import apply_user_callback
 
 

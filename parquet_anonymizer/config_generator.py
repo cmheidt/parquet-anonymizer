@@ -1,0 +1,143 @@
+import os
+import logging
+import polars as pl
+import dateutil.parser as date_parser
+
+from .config import Config
+
+# Todo: optimize
+
+def generate_yaml_config(data_file, has_header, delimiter, enableOptions=True):
+    data_dict = build_data_dictionary(data_file, has_header, delimiter)
+    new_config = Config(delimiter=delimiter)
+    for column in data_dict:
+        column_config = get_best_column_config_for_column(
+            data_dict[column], enableOptions=enableOptions
+        )
+        if column_config is None:
+            continue
+        new_config.add_column_config(column, column_config)
+    if os.path.dirname(data_file) != "":
+        data_file_path = os.path.dirname(data_file) + "/"
+        file_base_name = os.path.splitext(os.path.basename(data_file))[0]
+        config_file_name = "{}generated-{}-config.yml".format(data_file_path, file_base_name)
+    else:
+        config_file_name = "generated-{}-config.yml".format(data_file)
+    get_logger().info(f"Saving generated config file to: {config_file_name}")
+    new_config.save_config(save_name=config_file_name)
+
+
+def get_logger():
+    return logging.getLogger("config_generator")
+
+
+def build_data_dictionary(data_file, has_header=True, delimiter=","):
+    """
+    Builds a dictionary where the keys are the columns in the file, and the values are lists of that column's values
+    :param data_file: str
+    :param has_header: boolean
+    :param delimiter: str
+    :return: dict
+    """
+    file_extension = data_file.split(".")[-1].lower()
+
+    if file_extension == "csv":
+        df = pl.read_csv(data_file, has_header=has_header, separator=delimiter)
+    elif file_extension in ["xlsx", "xls"]:
+        df = pl.read_excel(data_file, read_csv_options={"has_header": has_header})
+    elif file_extension == "parquet":
+        df = pl.read_parquet(data_file)
+    else:
+        raise ValueError(f"Unsupported file format: {file_extension}")
+
+    if not has_header:
+        df.columns = [str(i) for i in range(len(df.columns))]
+
+    return {col: df[col].to_list() for col in df.columns}
+
+
+def get_best_column_config_for_column(column_values, enableOptions=True):
+    if len(column_values) == 0:
+        return
+    column_config = get_date_time_config_if_dates_found(column_values)
+    if column_config:
+        return column_config
+    if enableOptions:
+        column_config = get_options_config_if_fewer_than_five_hundred(column_values)
+    if column_config:
+        return column_config
+    return get_default_custom_column_config(column_values)
+
+
+def get_date_time_config_if_dates_found(column_values):
+    """
+    If the values in the column look like dates, return a datetime column configuration
+    :param column_values:
+    :return:
+    """
+    sample_value: str = column_values.pop(0)
+    while sample_value is None and len(column_values) > 0:
+        sample_value = column_values.pop(0)
+    if sample_value is None:
+        return
+    match = get_matched_date(sample_value)
+    if match is not None:
+        column_values.append(sample_value)
+        min_date = None
+        max_date = None
+        for value in column_values:
+            matched_date = get_matched_date(value)
+            if matched_date is not None:
+                if min_date is None or matched_date < min_date:
+                    min_date = matched_date
+                if max_date is None or matched_date > max_date:
+                    max_date = matched_date
+        return {
+            "type": "datetime",
+            "format": "%Y-%m-%d",
+            "range_start_date": min_date.strftime("%Y-%m-%d"),
+            "range_end_date": max_date.strftime("%Y-%m-%d"),
+        }
+
+
+def get_matched_date(value):
+    if len(value) < 6:
+        return
+    try:
+        return date_parser.parse(value)
+    except ValueError:
+        return
+    except OverflowError:
+        get_logger().debug("Got overflow error trying to match %s", value)
+
+
+def get_options_config_if_fewer_than_five_hundred(column_values):
+    """
+    If there are fewer than 500 unique values for a column, return an Options configuration dictionary
+    :param column_values:
+    :return:
+    """
+    unique_dict = {}
+    for value in column_values:
+        unique_dict[value] = True
+    uniques = list(unique_dict.keys())
+    if len(unique_dict.values()) < 500:
+        return {"type": "options", "options": uniques}
+
+
+def get_default_custom_column_config(column_values):
+    sample_value: str = column_values.pop(0)
+    while sample_value is None and len(column_values) > 0:
+        sample_value = column_values.pop(0)
+    if sample_value is None:
+        format_string = "????"
+    else:
+        format_string = ""
+        for char in sample_value:
+            if char.isalpha():
+                format_string += "?"
+            elif char.isnumeric():
+                format_string += "#"
+            else:
+                format_string += char
+    return {"type": "custom", "format": format_string}

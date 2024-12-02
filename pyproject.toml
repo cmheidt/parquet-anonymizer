@@ -25,3 +25,6 @@ target-version = "py312"
 #exclude = ["migrations", "notebooks"]
 line-length = 100
 lint.select = ["E", "F"]
+
+[tool.ruff.format]
+docstring-code-format = true

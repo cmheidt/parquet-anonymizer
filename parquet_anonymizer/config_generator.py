@@ -7,7 +7,26 @@ from .config import Config
 
 # Todo: optimize
 
+
 def generate_yaml_config(data_file, has_header, delimiter, enableOptions=True):
+    """
+    Generates a YAML configuration file based on the provided data file.
+
+    Args:
+        data_file (str): Path to the data file to be used for generating the configuration.
+        has_header (bool): Indicates whether the data file contains a header row.
+        delimiter (str): The delimiter used in the data file (e.g., ',', '\t').
+        enableOptions (bool, optional): Flag to enable or disable additional options. 
+        Defaults to True.
+
+    Returns:
+        None
+
+    The function builds a data dictionary from the provided data file, determines the best 
+    configuration for each column, and saves the generated configuration to a YAML file. The 
+    generated configuration file is saved in the same directory as the data file with a name based 
+    on the data file's name.
+    """
     data_dict = build_data_dictionary(data_file, has_header, delimiter)
     new_config = Config(delimiter=delimiter)
     for column in data_dict:
@@ -33,11 +52,19 @@ def get_logger():
 
 def build_data_dictionary(data_file, has_header=True, delimiter=","):
     """
-    Builds a dictionary where the keys are the columns in the file, and the values are lists of that column's values
-    :param data_file: str
-    :param has_header: boolean
-    :param delimiter: str
-    :return: dict
+    Builds a dictionary where the keys are the columns in the file, and the values are lists of
+    that column's values.
+
+    Args:
+        data_file (str): The path to the data file.
+        has_header (bool, optional): Whether the file has a header row. Defaults to True.
+        delimiter (str, optional): The delimiter used in the file. Defaults to ",".
+
+    Returns:
+        dict: A dictionary with column names as keys and lists of column values as values.
+
+    Raises:
+        ValueError: If the file format is unsupported.
     """
     file_extension = data_file.split(".")[-1].lower()
 
@@ -57,6 +84,24 @@ def build_data_dictionary(data_file, has_header=True, delimiter=","):
 
 
 def get_best_column_config_for_column(column_values, enableOptions=True):
+    """
+    Determines the best configuration for a given column based on its values.
+
+    This function evaluates the column values and returns the most appropriate
+    configuration. It first checks if the column contains date/time values and
+    returns the corresponding configuration if found. If not, and if the
+    `enableOptions` flag is set to True, it checks if the column has fewer than
+    five hundred unique values and returns an options-based configuration. If
+    neither condition is met, it returns a default custom configuration.
+
+    Args:
+        column_values (list): A list of values in the column to be evaluated.
+        enableOptions (bool, optional): A flag to enable or disable the options
+                                        configuration check. Defaults to True.
+
+    Returns:
+        dict: The configuration for the column, or None if the column is empty.
+    """
     if len(column_values) == 0:
         return
     column_config = get_date_time_config_if_dates_found(column_values)
@@ -72,8 +117,9 @@ def get_best_column_config_for_column(column_values, enableOptions=True):
 def get_date_time_config_if_dates_found(column_values):
     """
     If the values in the column look like dates, return a datetime column configuration
-    :param column_values:
-    :return:
+    in the range of all the dates found in the column.
+    :param column_values: list: A list of column values
+    :return: dict: A dictionary containing the type of configuration and the date range
     """
     sample_value: str = column_values.pop(0)
     while sample_value is None and len(column_values) > 0:
@@ -101,6 +147,13 @@ def get_date_time_config_if_dates_found(column_values):
 
 
 def get_matched_date(value):
+    """
+    Parses a date string and returns a datetime object if the string is a valid date.
+
+    :param value (str): The date string to be parsed.
+    :return datetime.datetime or None: A datetime object if the string is a valid date,
+                                   None if the string is too short or cannot be parsed.
+    """
     if len(value) < 6:
         return
     try:
@@ -113,9 +166,9 @@ def get_matched_date(value):
 
 def get_options_config_if_fewer_than_five_hundred(column_values):
     """
-    If there are fewer than 500 unique values for a column, return an Options configuration dictionary
-    :param column_values:
-    :return:
+    If there are fewer than 500 unique values for a column, return an Options configuration dict
+    :param column_values (list): A list of column values
+    :return: dict: A dictionary containing the type of configuration and the unique values
     """
     unique_dict = {}
     for value in column_values:
@@ -126,6 +179,17 @@ def get_options_config_if_fewer_than_five_hundred(column_values):
 
 
 def get_default_custom_column_config(column_values):
+    """
+    Generate a default custom column configuration based on the sample values provided.
+
+    Takes a list of column values, extracts the first non-None value, and generates a
+    format string where alphabetic characters are replaced with '?', numeric characters are
+    replaced with '#', and other characters remain unchanged. If all values are None, a default
+    format string "????" is returned.
+
+    :param column_values (list): A list of column values from which to derive the format string.
+    :return: dict: A dictionary containing the type of configuration and the generated format string
+    """
     sample_value: str = column_values.pop(0)
     while sample_value is None and len(column_values) > 0:
         sample_value = column_values.pop(0)

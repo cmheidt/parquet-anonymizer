@@ -32,22 +32,24 @@ def anonymize_dataframe(
     return df
 
 
-def anonymize_csv(config: Config, in_filename: str, out_filename: str, user_callback: UserCallback):
+def anonymize_csv(
+    config: Config, in_filename: str, out_filename: str, user_callback: UserCallback = None
+):
     df = pl.read_csv(in_filename, separator=config.delimiter)
     df = anonymize_dataframe(config, df, user_callback)
     df.write_csv(out_filename, separator=config.delimiter)
 
 
 def anonymize_parquet(
-    config: Config, in_filename: str, out_filename: str, user_callback: UserCallback
+    config: Config, in_filename: str, out_filename: str, user_callback: UserCallback = None
 ):
     df = pl.read_parquet(in_filename)
     df = anonymize_dataframe(config, df, user_callback)
     df.write_parquet(out_filename)
 
 
-def anonymize_xslx(
-    config: Config, in_filename: str, out_filename: str, user_callback: UserCallback
+def anonymize_xlsx(
+    config: Config, in_filename: str, out_filename: str, user_callback: UserCallback = None
 ):
     df = pl.read_excel(in_filename)
     df = anonymize_dataframe(config, df, user_callback)

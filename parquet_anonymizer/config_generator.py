@@ -5,7 +5,7 @@ import dateutil.parser as date_parser
 
 from .config import Config
 
-# Todo: optimize
+# TODO: optimize
 
 
 def generate_yaml_config(data_file, has_header, delimiter, enableOptions=True):

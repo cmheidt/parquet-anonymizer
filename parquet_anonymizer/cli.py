@@ -1,8 +1,8 @@
 import logging
 import click
+import os
 
 from parquet_anonymizer.config import Config
-from parquet_anonymizer.field_types.field_type_factory import FieldTypeFactory
 from parquet_anonymizer.config_generator import generate_yaml_config
 from parquet_anonymizer.anonymizer import anonymize_csv, anonymize_parquet, anonymize_xlsx
 from parquet_anonymizer.util import keygen, DEFAULT_KEY_FILE
@@ -38,17 +38,27 @@ def generate_config(file, has_header, delimiter):
     required=True,
 )
 @click.option(
+    "--delimiter", help="Delimiter used in the data file. For CSV files. Defaults to ','."
+)
+@click.option(
     "--key-file",
     type=click.Path(),
     help="Path to the key file to be used for anonymization. If not provided, a random key "
     + "will be generated.",
 )
-def anonymize_file(in_file, out_file, config_file, key_file=None):
+def anonymize_file(in_file, out_file, config_file, delimiter, key_file=None):
     """Anonymizes a file using the provided configuration file."""
-    config = Config.load_config(config_file)
+    for path in [in_file, config_file]:
+        if not os.path.isfile(path):
+            logging.error(f"No such file: {path}")
+            return
+    config = Config(yaml_path=config_file, key_file_path=key_file, delimiter=delimiter)
     if out_file is None:
-        out_file = in_file.replace(".csv", "_anonymized.csv").replace(
-            ".parquet", "_anonymized.parquet").replace(".xlsx", "_anonymized.xlsx")
+        out_file = (
+            in_file.replace(".csv", "_anonymized.csv")
+            .replace(".parquet", "_anonymized.parquet")
+            .replace(".xlsx", "_anonymized.xlsx")
+        )
     if key_file is None:
         keygen()
         key_file = DEFAULT_KEY_FILE
@@ -61,3 +71,12 @@ def anonymize_file(in_file, out_file, config_file, key_file=None):
         anonymize_xlsx(config, in_file, out_file)
     else:
         logging.error("Unsupported file format. Supported formats are: csv, parquet, xlsx.")
+
+@click.group()
+def cli():
+    """Entry point"""
+
+if __name__ == "__main__":
+    cli.add_command(generate_config)
+    cli.add_command(anonymize_file)
+    cli()

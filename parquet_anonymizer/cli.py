@@ -9,7 +9,7 @@ from parquet_anonymizer.util import keygen, DEFAULT_KEY_FILE
 
 
 @click.command()
-@click.argument("file", type=click.Path(exists=True), help="Path to the data file.")
+@click.argument("file", type=click.Path(exists=True))
 @click.option(
     "--has-header", is_flag=True, help="Indicates whether the data file contains a header row."
 )
@@ -74,7 +74,7 @@ def anonymize_file(in_file, out_file, config_file, delimiter, key_file=None):
 
 @click.group()
 def cli():
-    """Entry point"""
+    """Anonymizer CLI for CSV, Parquet, and Excel files."""
 
 if __name__ == "__main__":
     cli.add_command(generate_config)

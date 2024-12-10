@@ -16,15 +16,15 @@ def generate_yaml_config(data_file, has_header, delimiter, enableOptions=True):
         data_file (str): Path to the data file to be used for generating the configuration.
         has_header (bool): Indicates whether the data file contains a header row.
         delimiter (str): The delimiter used in the data file (e.g., ',', '\t').
-        enableOptions (bool, optional): Flag to enable or disable additional options. 
+        enableOptions (bool, optional): Flag to enable or disable additional options.
         Defaults to True.
 
     Returns:
         None
 
-    The function builds a data dictionary from the provided data file, determines the best 
-    configuration for each column, and saves the generated configuration to a YAML file. The 
-    generated configuration file is saved in the same directory as the data file with a name based 
+    The function builds a data dictionary from the provided data file, determines the best
+    configuration for each column, and saves the generated configuration to a YAML file. The
+    generated configuration file is saved in the same directory as the data file with a name based
     on the data file's name.
     """
     data_dict = build_data_dictionary(data_file, has_header, delimiter)
@@ -154,10 +154,10 @@ def get_matched_date(value):
     :return datetime.datetime or None: A datetime object if the string is a valid date,
                                    None if the string is too short or cannot be parsed.
     """
-    if len(value) < 6:
+    if len(str(value)) < 6:
         return
     try:
-        return date_parser.parse(value)
+        return date_parser.parse(str(value))
     except ValueError:
         return
     except OverflowError:

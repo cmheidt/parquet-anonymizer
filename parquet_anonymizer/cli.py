@@ -52,7 +52,6 @@ def anonymize_file(in_file, out_file, config_file, delimiter, key_file=None):
         if not os.path.isfile(path):
             logging.error(f"No such file: {path}")
             return
-    config = Config(yaml_path=config_file, key_file_path=key_file, delimiter=delimiter)
     if out_file is None:
         out_file = (
             in_file.replace(".csv", "_anonymized.csv")
@@ -63,6 +62,7 @@ def anonymize_file(in_file, out_file, config_file, delimiter, key_file=None):
         keygen()
         key_file = DEFAULT_KEY_FILE
         logging.warning(f"No key file provided. Generating a random key and saving to {key_file}.")
+    config = Config(yaml_path=config_file, key_file_path=key_file, delimiter=delimiter)
     if in_file.endswith(".csv"):
         anonymize_csv(config, in_file, out_file)
     elif in_file.endswith(".parquet"):
@@ -72,9 +72,11 @@ def anonymize_file(in_file, out_file, config_file, delimiter, key_file=None):
     else:
         logging.error("Unsupported file format. Supported formats are: csv, parquet, xlsx.")
 
+
 @click.group()
 def cli():
     """Anonymizer CLI for CSV, Parquet, and Excel files."""
+
 
 if __name__ == "__main__":
     cli.add_command(generate_config)

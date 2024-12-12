@@ -16,10 +16,10 @@ def anonymize_dataframe(
         field_type = FieldTypeFactory.get_type(type_config_dict)
 
         if field_type is not None:
-            df = df.with_column(
+            df = df.with_columns(
                 pl.when(pl.col(column_name).is_not_null() & (pl.col(column_name) != ""))
                 .then(
-                    pl.col(column_name).apply(
+                    pl.col(column_name).map_elements(
                         lambda x: field_type.generate_obfuscated_value(
                             config.secret_key, x, user_callback
                         )

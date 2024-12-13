@@ -17,6 +17,7 @@
       "request": "launch",
       "name": "Launch Anonymizer",
       "program": "${workspaceFolder}/parquet_anonymizer/cli.py",
+      "justMyCode": false,
       "args": [
         "anonymize-file",
         "--in_file",

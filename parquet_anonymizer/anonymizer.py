@@ -17,12 +17,12 @@ def anonymize_dataframe(
 
         if field_type is not None:
             df = df.with_columns(
-                pl.when(pl.col(column_name).is_not_null() & (pl.col(column_name) != ""))
+                pl.when(pl.col(column_name).is_not_null())
                 .then(
                     pl.col(column_name).map_elements(
                         lambda x: field_type.generate_obfuscated_value(
                             config.secret_key, x, user_callback
-                        )
+                        ), return_dtype=df[column_name].dtype
                     )
                 )
                 .otherwise(pl.col(column_name))

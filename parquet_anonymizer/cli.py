@@ -59,8 +59,9 @@ def anonymize_file(in_file, out_file, config_file, delimiter, key_file=None):
             .replace(".xlsx", "_anonymized.xlsx")
         )
     if key_file is None:
-        keygen()
-        key_file = DEFAULT_KEY_FILE
+        key_dir = os.path.dirname(in_file) + "/"
+        key_file = key_dir + DEFAULT_KEY_FILE
+        keygen(key_file)
         logging.warning(f"No key file provided. Generating a random key and saving to {key_file}.")
     config = Config(yaml_path=config_file, key_file_path=key_file, delimiter=delimiter)
     if in_file.endswith(".csv"):

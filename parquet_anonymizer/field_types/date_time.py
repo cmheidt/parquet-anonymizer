@@ -32,7 +32,10 @@ class DateTimeField(BaseFieldType):
     @apply_formatting_options
     @apply_user_callback
     def generate_obfuscated_value(self, key, value, *args, **kwargs):
-        self.seed_faker(key, value)
+        if type(value) is not str:
+            self.seed_faker(key, value.strftime(self.format_string))
+        else:
+            self.seed_faker(key, value)
         generated_date = self.faker.date_time_between_dates(
             self.range_start_date, self.range_end_date
         )
@@ -40,8 +43,7 @@ class DateTimeField(BaseFieldType):
             try:
                 if generated_date.month == 2 and generated_date.day == 29:
                     generated_date = generated_date.replace(month=3)
-                value_year = date_parser.parse(value).year
-                generated_date = generated_date.replace(year=value_year)
+                generated_date = generated_date.replace(year=value.year)
             except ValueError:
                 self.get_logger().warning(
                     "Could not parse year from %s. Unable to preserve year.", value
@@ -49,4 +51,5 @@ class DateTimeField(BaseFieldType):
         if self.safe_harbor and abs(generated_date.year - datetime.today().year) >= 90:
             year_delta_150 = datetime.today().year - 150
             generated_date = generated_date.replace(year=year_delta_150)
-        return generated_date.strftime(self.format_string)
+        # return generated_date.strftime(self.format_string)
+        return generated_date

@@ -52,4 +52,5 @@ class DateTimeField(BaseFieldType):
             year_delta_150 = datetime.today().year - 150
             generated_date = generated_date.replace(year=year_delta_150)
         # return generated_date.strftime(self.format_string)
+        generated_date = generated_date.replace(microsecond=0)
         return generated_date

@@ -14,5 +14,5 @@ class Options(BaseFieldType):
     @apply_formatting_options
     @apply_user_callback
     def generate_obfuscated_value(self, key, value, *args, **kwargs):
-        self.seed_faker(key, value)
+        self.seed_faker(key, str(value))
         return self.faker.random_element(self.options)

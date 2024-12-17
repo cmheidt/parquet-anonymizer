@@ -25,7 +25,9 @@
         // "--out_file",
         // "${input:outFile}",
         "--config_file",
-        "${input:configFile}"
+        "${input:configFile}",
+        "--key-file",
+        "${input:keyFile}"
       ]
     },
     {
@@ -63,6 +65,12 @@
       "id": "delimiter",
       "description": "Delimiter used in the data file, only needed for csv (default: ,)",
       "default": ","
+    },
+    {
+      "type": "promptString",
+      "id": "keyFile",
+      "description": "Key file to seed the anonymizer. Defaults to data/anonymizer.key.",
+      "default": "data/anonymizer.key"
     }
   ]
 }

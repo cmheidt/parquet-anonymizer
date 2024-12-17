@@ -190,9 +190,9 @@ def get_default_custom_column_config(column_values):
     :param column_values (list): A list of column values from which to derive the format string.
     :return: dict: A dictionary containing the type of configuration and the generated format string
     """
-    sample_value: str = column_values.pop(0)
+    sample_value: str = str(column_values.pop(0))
     while sample_value is None and len(column_values) > 0:
-        sample_value = column_values.pop(0)
+        sample_value = str(column_values.pop(0))
     if sample_value is None:
         format_string = "????"
     else:

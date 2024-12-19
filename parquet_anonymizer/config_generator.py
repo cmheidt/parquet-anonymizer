@@ -4,8 +4,11 @@ import polars as pl
 import dateutil.parser as date_parser
 
 from .config import Config
+from memory_profiler import profile
 
 # TODO: optimize
+
+mem_logs = open("memory_profiler.log", "w")
 
 
 def generate_yaml_config(data_file, has_header, delimiter, enableOptions=True):
@@ -50,6 +53,7 @@ def get_logger():
     return logging.getLogger("config_generator")
 
 
+@profile(stream=mem_logs)
 def build_data_dictionary(data_file, has_header=True, delimiter=","):
     """
     Builds a dictionary where the keys are the columns in the file, and the values are lists of
@@ -75,12 +79,15 @@ def build_data_dictionary(data_file, has_header=True, delimiter=","):
     elif file_extension == "parquet":
         df = pl.read_parquet(data_file)
     else:
-        raise ValueError(f"Unsupported file format: {file_extension}")
+        raise ValueError(
+            f"Unsupported file format: {file_extension}. Supported formats are: csv, xlsx, parquet."
+        )
 
     if not has_header:
         df.columns = [str(i) for i in range(len(df.columns))]
 
-    return {col: df[col].to_list() for col in df.columns}
+    # TODO: look into optimizing this dict, takes up a lot of memory
+    return {col: df[col].to_list() for col in df.columns}  
 
 
 def get_best_column_config_for_column(column_values, enableOptions=True):

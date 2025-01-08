@@ -15,4 +15,8 @@ class Custom(BaseFieldType):
     @apply_user_callback
     def generate_obfuscated_value(self, key, value, *args, **kwargs):
         self.seed_faker(key, value)
-        return self.faker.bothify(self.format)
+        retval = self.faker.bothify(self.format)
+        # check if format_string contains only #, if so, return a number
+        if all([c == "#" for c in self.format]):
+            return int(retval)
+        return retval

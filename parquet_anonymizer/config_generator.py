@@ -86,7 +86,7 @@ def build_data_dictionary(data_file, has_header=True, delimiter=","):
     if not has_header:
         df.columns = [str(i) for i in range(len(df.columns))]
 
-    # TODO: look into optimizing this dict, takes up a lot of memory
+    # TODO: look into optimizing this dict on memory efficiency
     return {col: df[col].to_list() for col in df.columns}  
 
 

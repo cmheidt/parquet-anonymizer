@@ -11,8 +11,9 @@ class Options(BaseFieldType):
             raise ValueError("Options field type must have an options list property defined")
         self.options = options
 
-    @apply_formatting_options
-    @apply_user_callback
+    #@apply_formatting_options
+    #@apply_user_callback
     def generate_obfuscated_value(self, key, value, *args, **kwargs):
         self.seed_faker(key, str(value))
+        retval = self.faker.random_element(self.options)
         return self.faker.random_element(self.options)

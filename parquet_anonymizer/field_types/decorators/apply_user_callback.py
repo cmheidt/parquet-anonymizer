@@ -12,16 +12,16 @@ def apply_user_callback(func):
 
         anonymized_value = func(self, *args, **kwargs)
 
-        if len(args) > 2:
-            if isinstance(args[2], UserCallback):
-                user_callback = args[2]
-            else:
-                " We got a tuple with all the value, something to do with args and kwargs "
-                user_callback = args[2][2]
-            if user_callback is not None and isinstance(user_callback, UserCallback):
-                anonymized_value = user_callback.handleResult(
-                    column_type, args[1], anonymized_value
-                )
+        # if len(args) > 2:
+        #     if isinstance(args[2], UserCallback):
+        #         user_callback = args[2]
+        #     else:
+        #         " We got a tuple with all the value, something to do with args and kwargs "
+        #         user_callback = args[2][2]
+        #     if user_callback is not None and isinstance(user_callback, UserCallback):
+        #         anonymized_value = user_callback.handleResult(
+        #             column_type, args[1], anonymized_value
+        #         )
         return anonymized_value
 
     return wrapper

@@ -20,11 +20,11 @@
       "justMyCode": false,
       "args": [
         "anonymize-file",
-        "--in_file",
+        "--in-file",
         "${input:inFile}",
         // "--out_file",
         // "${input:outFile}",
-        "--config_file",
+        "--config-file",
         "${input:configFile}",
         "--key-file",
         "${input:keyFile}"

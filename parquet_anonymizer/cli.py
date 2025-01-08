@@ -25,14 +25,14 @@ def generate_config(file, has_header, delimiter):
 
 @click.command()
 @click.option(
-    "--in_file",
+    "--in-file",
     type=click.Path(exists=True),
     help="Path to the file to be anonymized.",
     required=True,
 )
-@click.option("--out_file", type=click.Path(), help="Path to the output file.")
+@click.option("--out-file", type=click.Path(), help="Path to the output file.")
 @click.option(
-    "--config_file",
+    "--config-file",
     type=click.Path(exists=True),
     help="Path to the configuration file.",
     required=True,

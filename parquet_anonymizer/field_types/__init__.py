@@ -10,6 +10,9 @@ class BaseFieldType:
 
     @staticmethod
     def generate_seed(key, value):
+        # cast value to str if not str
+        if not isinstance(value, str):
+            value = str(value)
         combination = key + value
         value = xxhash.xxh64(combination.encode()).hexdigest()
         return value
